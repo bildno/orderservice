@@ -6,10 +6,14 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/orderservice?serverTimezone=Asia/Seoul
     username: root
-    password: mysql
+    password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database: mysql
     database-platform: org.hibernate.dialect.MySQL8Dialect
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
+
+jwt:
+  expiration: 30
+  secretKey: MXfAuvUHe7vyOo6rfHPMZga4b7YgvokM/B9ytSRaAYsXii76YlbTPPvE6KtgHqUvhfSU528DjR4H1xUNGuIzQg==
