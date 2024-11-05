@@ -10,7 +10,9 @@ import com.playdata.orderservice.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/user")
@@ -30,6 +33,9 @@ public class UserController {
 
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
+
+    @Qualifier("user-template") // RedisTemplate이 여러개 빈 등록되었을 경우 명시
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @PostMapping("/create")
     public ResponseEntity<?> userCreate(@Valid @RequestBody UserSaveReqDto dto) {
@@ -46,8 +52,17 @@ public class UserController {
         User user = userService.login(dto);
 
         // 회원정보가 일치한다면, JWT를 클라이언트에게 발급해 주어야 한다. -> 로그인 유지를 위해
-
+        // access token을 생성해 발급 -> 수명이 짧음
         String token = jwtTokenProvider.createToken(user.getEmail(), user.getRole().toString());
+
+        // refresh token 생성
+        // access token의 수명이 만료되었을 경우 refresh token을 확인해 유효한 경우
+        // 사용자에게 로그인 없이 access token을 재발급 해 줄 용도
+
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail(), user.getRole().toString());
+        
+        // refresh Token 을 db에 저장 -> redis에 저장
+        redisTemplate.opsForValue().set(user.getEmail(), refreshToken,240, TimeUnit.HOURS);
 
         // 생성된 토큰외에 추가로 전달하고싶은 데이터가 있다면 
         // 맵을 사용하는 것이 편함

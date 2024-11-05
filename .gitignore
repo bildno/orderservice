@@ -1,3 +1,6 @@
+
+application-local.yml
+
 .gradle
 build/
 gradle/**
