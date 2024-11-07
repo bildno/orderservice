@@ -63,7 +63,7 @@ public class UserController {
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail(), user.getRole().toString());
         
         // refresh Token 을 db에 저장 -> redis에 저장
-        redisTemplate.opsForValue().set(user.getEmail(), refreshToken,240, TimeUnit.HOURS);
+        redisTemplate.opsForValue().set(user.getEmail(), refreshToken,20, TimeUnit.SECONDS);
 
         // 생성된 토큰외에 추가로 전달하고싶은 데이터가 있다면 
         // 맵을 사용하는 것이 편함
@@ -91,7 +91,7 @@ public class UserController {
         CommonResDto resDto = new CommonResDto(HttpStatus.OK, "userList 조회 성공", dtoList);
 
 
-        return ResponseEntity.ok().body(dtoList);
+        return ResponseEntity.ok().body(resDto);
     }
     
     // 회원 정보 조회 (마이페이지) - 일반회원의 요청
@@ -106,15 +106,16 @@ public class UserController {
     
     // access token이 만료되어 새 토큰을 요청
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@RequestBody String id) {
-        User user = userService.findbyId(Long.parseLong(id));
+    public ResponseEntity<?> refreshToken(@RequestBody Map<Object, String> id) {
+
+        User user = userService.findbyId(Long.parseLong(id.get("id")));
 
         // email로 redis를 조회해서 refresh token을 가져오자
         Object obj = redisTemplate.opsForValue().get(user.getEmail());
 
         if(obj == null){ // null 이라면 refresh 토큰의 수명이 다 된것
             return new ResponseEntity<>(new CommonErrorDto(
-                    HttpStatus.UNAUTHORIZED, "리프레쉬 토큰도 만료됨 로그인 필요"
+                    HttpStatus.UNAUTHORIZED, "EXPIRED_RT"
                     ), HttpStatus.UNAUTHORIZED);
         }
 

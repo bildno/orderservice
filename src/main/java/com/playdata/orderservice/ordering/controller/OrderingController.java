@@ -50,9 +50,9 @@ public class OrderingController {
 
         List<OrderingListResDto> list = orderingService.myOrders(userInfo);
 
-        new CommonResDto(HttpStatus.OK, "조회완료", list);
+        CommonResDto resDto = new CommonResDto(HttpStatus.OK, "조회완료", list);
 
-        return new ResponseEntity<>(list, HttpStatus.OK);
+        return new ResponseEntity<>(resDto, HttpStatus.OK);
 
 
 
@@ -64,9 +64,9 @@ public class OrderingController {
     public ResponseEntity<?> list() {
 
         List<OrderingListResDto> all = orderingService.findAll();
-        new CommonResDto(HttpStatus.OK, "조회완료", all);
+        CommonResDto resDto = new CommonResDto(HttpStatus.OK, "조회완료", all);
 
-    return new ResponseEntity<>(all, HttpStatus.OK);
+        return new ResponseEntity<>(resDto, HttpStatus.OK);
     }
 
 

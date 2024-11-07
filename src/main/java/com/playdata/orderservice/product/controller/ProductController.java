@@ -51,9 +51,9 @@ public class ProductController {
 
         List<ProductResDto> list = productService.getList(pageable);
 
-        new CommonResDto(HttpStatus.OK, "조회성공", list);
+        CommonResDto resDto = new CommonResDto(HttpStatus.OK, "조회성공", list);
 
-        return new ResponseEntity<> (list, HttpStatus.CREATED);
+        return new ResponseEntity<> (resDto, HttpStatus.CREATED);
     }
 
 
