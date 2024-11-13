@@ -54,7 +54,7 @@ public class JwtTokenProvider {
                 .setClaims(claims)
                 .setIssuedAt(date)
                 // 현재 시간 밀리초에 30분을 더한 시간을 만료시간으로 세팅
-                .setExpiration(new Date(date.getTime() + 10 * 1000L))
+                    .setExpiration(new Date(date.getTime() + expiration * 60 * 1000L))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
@@ -72,7 +72,7 @@ public class JwtTokenProvider {
                 .setClaims(claims)
                 .setIssuedAt(date)
                 // 현재 시간 밀리초에 30분을 더한 시간을 만료시간으로 세팅
-                .setExpiration(new Date(date.getTime() + 20 * 1000L))
+                .setExpiration(new Date(date.getTime() + expirationRt * 60 * 1000L))
                 .signWith(SignatureAlgorithm.HS256, secretKeyRt)
                 .compact();
     }

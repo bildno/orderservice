@@ -3,19 +3,20 @@ package com.playdata.orderservice.product.controller;
 import com.playdata.orderservice.common.dto.CommonResDto;
 import com.playdata.orderservice.product.dto.ProductResDto;
 import com.playdata.orderservice.product.dto.ProductSaveReqDto;
+import com.playdata.orderservice.product.dto.ProductSearchDto;
 import com.playdata.orderservice.product.entity.Product;
 import com.playdata.orderservice.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
 
 @RestController
@@ -32,7 +33,7 @@ public class ProductController {
     // 요청과 함께 이미지가 전달이 됨, 해당 이미지를 처리하는 방식이 두 가지로 나뉨
     // 1. js의 FormData 객체를 통해 모든 데이터를 전달 (multipart/form-data 형식으로 전달, form 태그 x)
     // 2. JSON 형태로 전달(이미지를 Base64 인코딩을 통해 문자열로 변환해서 전달)
-    public ResponseEntity<?> create(ProductSaveReqDto dto){
+    public ResponseEntity<?> create(ProductSaveReqDto dto) throws IOException {
 
         log.info("/product/create : POST");
         Product product = productService.productCreate(dto);
@@ -43,18 +44,28 @@ public class ProductController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<?> list(Pageable pageable){
-        log.info("/product/list : GET");
+    public ResponseEntity<?> list(ProductSearchDto searchDto, Pageable pageable){
+        log.info("/product/list : GET dto {}", searchDto );
+        log.info("/product/list : GET pageable {}", pageable );
 
         // 페이징이 필요합니다. 리턴은 ProductResDto 형태로 리턴됩니다.
         // ProductResDto(id, name, category, price, stockQuantity, imagePath)
 
-        List<ProductResDto> list = productService.getList(pageable);
+        Page<ProductResDto> list = productService.getList(searchDto, pageable);
 
         CommonResDto resDto = new CommonResDto(HttpStatus.OK, "조회성공", list);
 
         return new ResponseEntity<> (resDto, HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> productDelete(@RequestParam Long id) throws Exception {
+        log.info("/product/delete : DELETE {}", id);
 
+        productService.productDelete(id);
+
+        CommonResDto resDto = new CommonResDto(HttpStatus.OK, "삭제완료", null);
+        return new ResponseEntity<>(resDto, HttpStatus.OK);
+    }
 }

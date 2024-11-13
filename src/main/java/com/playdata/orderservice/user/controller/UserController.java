@@ -63,7 +63,7 @@ public class UserController {
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail(), user.getRole().toString());
         
         // refresh Token 을 db에 저장 -> redis에 저장
-        redisTemplate.opsForValue().set(user.getEmail(), refreshToken,20, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(user.getEmail(), refreshToken,240, TimeUnit.HOURS);
 
         // 생성된 토큰외에 추가로 전달하고싶은 데이터가 있다면 
         // 맵을 사용하는 것이 편함
