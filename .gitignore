@@ -1,5 +1,7 @@
 
 application-local.yml
+src/main/resources/application-prod.yml
+
 
 .gradle
 build/
